@@ -1,4 +1,5 @@
 import requests
+import streamlit as st
 from dotenv import load_dotenv
 import os
 
@@ -23,33 +24,28 @@ def get_stock_data(ticker):
     try:
         eps = float(overview.get("EPS", 0))
         pe_ratio = float(overview.get("PERatio", 0))
-        growth = float(overview.get("RevenueTTM", 0))
         shares = float(overview.get("SharesOutstanding", 1))
         price = float(quote["Global Quote"]["05. price"])
 
-        # Free Cash Flow = CFO - CapEx
+        # Free Cash Flow = Operating CF - CapEx
         annual_reports = cashflow.get("annualReports", [])
         if annual_reports:
             op_cf = float(annual_reports[0].get("operatingCashflow", 0))
             capex = float(annual_reports[0].get("capitalExpenditures", 0))
-            fcf = op_cf + capex
+            fcf = op_cf + capex  # capex is negative
         else:
             fcf = 0
 
         return {
             'eps': eps,
             'pe': pe_ratio,
-            'growth': 0.10,  #TODO: update
             'fcf': fcf,
             'shares': shares,
             'price': price
         }
-
     except Exception as e:
-        print("Error processing data:", e)
-        return {
-            'eps': 0, 'pe': 0, 'growth': 0, 'fcf': 0, 'shares': 1, 'price': 0
-        }
+        st.error(f"Error: {e}")
+        return None
 
 
 # --- Valuation Models ---
@@ -71,30 +67,44 @@ def graham_valuation(eps, growth):
 def pe_multiple_valuation(eps, peer_pe=15):
     return eps * peer_pe
 
-# --- Master Function ---
+# === STREAMLIT DASH ===
 
-def run_valuation(ticker):
-    print(f"\nRunning valuation for: {ticker.upper()}")
+st.set_page_config(page_title="Stock Valuation", layout="centered")
+
+st.title("📊 Stock Valuation Dashboard")
+ticker = st.text_input("Enter Stock Ticker (e.g., AAPL, MSFT):").upper()
+
+if ticker:
     data = get_stock_data(ticker)
 
-    eps = data['eps']
-    growth = data['growth']
-    fcf = data['fcf']
-    shares = data['shares']
-    price = data['price']
+    if data:
+        st.subheader(f"📈 Current Price: ${data['price']:.2f}")
 
-    # Intrinsic Value Calculations
-    dcf_total = dcf_model(fcf, growth, discount=0.10)
-    dcf_per_share = dcf_total / shares
+        # Parameters
+        growth = float(st.text_input("Expected FCF/EPS Growth Rate (e.g. 0.10 for 10%)", value="0.10"))
+        discount = float(st.text_input("Discount Rate (e.g. 0.10 for 10%)", value="0.10"))
+        terminal_growth = float(st.text_input("Terminal Growth Rate (e.g. 0.02 for 2%)", value="0.02"))
+        peer_pe = float(st.text_input("Peer P/E Ratio (e.g. 15)", value="15"))
+        years = int(st.text_input("Number of Years for DCF Projection", value="5"))
 
-    graham = graham_valuation(eps, growth)
-    multiple = pe_multiple_valuation(eps)
+        # Models
+        dcf_total = dcf_model(data['fcf'], growth, discount, years, terminal_growth)
+        dcf_per_share = dcf_total / data['shares']
 
-    print(f"\nCurrent Price: ${price:.2f}")
-    print(f"Estimated Intrinsic Value (DCF): ${dcf_per_share:.2f}")
-    print(f"Estimated Intrinsic Value (Graham): ${graham:.2f}")
-    print(f"Estimated Intrinsic Value (PE Multiple): ${multiple:.2f}")
+        graham = graham_valuation(data['eps'], growth)
+        multiple = pe_multiple_valuation(data['eps'], peer_pe)
 
-if __name__ == "__main__":
-    ticker_input = input("Enter stock ticker (e.g., AAPL): ")
-    run_valuation(ticker_input)
+        # Output
+        st.markdown("### 📌 Intrinsic Value Estimates")
+        st.metric("DCF Valuation / Share", f"${dcf_per_share:.2f}")
+        st.metric("Graham Estimate", f"${graham:.2f}")
+        st.metric("P/E Multiple Estimate", f"${multiple:.2f}")
+
+        # Summary Table
+        st.markdown("### 🧾 Summary")
+        st.write({
+            "EPS": data['eps'],
+            "Free Cash Flow (last year)": data['fcf'],
+            "Shares Outstanding": data['shares'],
+            "P/E Ratio": data['pe'],
+        })
