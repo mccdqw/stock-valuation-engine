@@ -16,11 +16,9 @@ const MetricsDisplay = ({ ticker }) => {
     const fetchMetrics = async () => {
       try {
         const response = await axios.get(`${API_BASE_URL}/api/key_metrics/${ticker}`);
-        console.log(response.data)
         setMetrics(response.data);
         setError(null);
       } catch (err) {
-        console.error('Error fetching metrics:', err);
         setError('Failed to load metrics.');
         setMetrics(null);
       }
@@ -29,65 +27,72 @@ const MetricsDisplay = ({ ticker }) => {
     fetchMetrics();
   }, [ticker]);
 
-  if (error) return <p style={{ color: 'red' }}>{error}</p>;
+  if (error) return <div className="text-red-600 text-center mt-4">{error}</div>;
   if (!metrics) return null;
 
   return (
-    <div className="grid grid-cols-2 gap-4 p-4">
-      {/* Avg PE Ratio */}
-      <div className="bg-white shadow rounded-xl p-4">
-        <h3 className="font-semibold">Avg PE Ratio</h3>
-        <p className="text-lg">{metrics.avg_pe_ratio}</p>
-      </div>
-
-      {/* Revenue Growth */}
-      <div className="bg-white shadow rounded-xl p-4">
-        <h3 className="font-semibold">Revenue Growth (%)</h3>
-        <p className="text-lg">{isNaN(metrics.revenue_growth) ? 'N/A' : `${metrics.revenue_growth}%`}</p>
+    <div className="w-full max-w-3xl mx-auto mt-8">
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+        {/* Avg PE Ratio */}
+        <div className="bg-white rounded-2xl shadow-md p-6 flex flex-col items-center">
+          <span className="text-gray-500 text-sm mb-1">Average P/E Ratio</span>
+          <span className="text-3xl font-bold text-blue-700">{metrics.avg_pe_ratio}</span>
+        </div>
+        {/* Revenue Growth */}
+        <div className="bg-white rounded-2xl shadow-md p-6 flex flex-col items-center">
+          <span className="text-gray-500 text-sm mb-1">Revenue Growth</span>
+          <span className="text-3xl font-bold text-green-600">
+            {isNaN(metrics.revenue_growth) ? 'N/A' : `${metrics.revenue_growth}%`}
+          </span>
+        </div>
       </div>
 
       {/* PE Ratio History Table */}
-      <div className="col-span-2">
-        <h3 className="text-xl font-bold mt-6 mb-2">PE Ratio History</h3>
-        <table className="min-w-full border">
-          <thead>
-            <tr>
-              {metrics.pe_ratio_series.years.map((year, i) => (
-                <th key={i} className="border px-2 py-1">{year}</th>
-              ))}
-            </tr>
-          </thead>
-          <tbody>
-            <tr>
-              {metrics.pe_ratio_series.values.map((val, i) => (
-                <td key={i} className="border px-2 py-1">{val.toFixed(2)}</td>
-              ))}
-            </tr>
-          </tbody>
-        </table>
+      <div className="bg-white rounded-2xl shadow-md p-6 mt-8">
+        <h3 className="text-lg font-semibold mb-4 text-gray-800">P/E Ratio History</h3>
+        <div className="overflow-x-auto">
+          <table className="min-w-full text-center">
+            <thead>
+              <tr>
+                {metrics.pe_ratio_series.years.map((year, i) => (
+                  <th key={i} className="px-3 py-2 text-gray-600 font-medium">{year}</th>
+                ))}
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                {metrics.pe_ratio_series.values.map((val, i) => (
+                  <td key={i} className="px-3 py-2 text-blue-700 font-semibold">{val.toFixed(2)}</td>
+                ))}
+              </tr>
+            </tbody>
+          </table>
+        </div>
       </div>
 
       {/* Revenue History Table */}
-      <div className="col-span-2">
-        <h3 className="text-xl font-bold mt-6 mb-2">Revenue History</h3>
-        <table className="min-w-full border">
-          <thead>
-            <tr>
-              {metrics.revenue_series.years.map((year, i) => (
-                <th key={i} className="border px-2 py-1">{year}</th>
-              ))}
-            </tr>
-          </thead>
-          <tbody>
-            <tr>
-              {metrics.revenue_series.values.map((val, i) => (
-                <td key={i} className="border px-2 py-1">
-                  {isNaN(val) ? 'N/A' : `$${(val / 1e9).toFixed(2)}B`}
-                </td>
-              ))}
-            </tr>
-          </tbody>
-        </table>
+      <div className="bg-white rounded-2xl shadow-md p-6 mt-8">
+        <h3 className="text-lg font-semibold mb-4 text-gray-800">Revenue History</h3>
+        <div className="overflow-x-auto">
+          <table className="min-w-full text-center">
+            <thead>
+              <tr>
+                {metrics.revenue_series.years.map((year, i) => (
+                  <th key={i} className="px-3 py-2 text-gray-600 font-medium">{year}</th>
+                ))}
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                {metrics.revenue_series.values.map((val, i) => (
+                  <td key={i} className="px-3 py-2 text-green-700 font-semibold">
+                    {isNaN(val) ? 'N/A' : `$${(val / 1e9).toFixed(2)}B`}
+                  </td>
+                ))}
+              </tr>
+            </tbody>
+          </table>
+        </div>
       </div>
     </div>
   );
