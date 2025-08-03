@@ -3,7 +3,7 @@ import axios from 'axios';
 
 const API_BASE_URL = 'http://localhost:5000';
 
-const ValuationForm = ({ setTicker, setShowResults }) => {
+const ValuationForm = ({ setTicker, setShowResults, large }) => {
     const [localTicker, setLocalTicker] = useState('');
     const [years, setYears] = useState(5);
     const [growth, setGrowth] = useState(8);
@@ -34,7 +34,7 @@ const ValuationForm = ({ setTicker, setShowResults }) => {
     };
 
     return (
-        <div className="max-w-lg mx-auto mt-10 bg-white rounded-2xl shadow-lg p-8">
+        <div className={`bg-white rounded-2xl shadow-lg p-8 ${large ? 'max-w-2xl' : 'max-w-lg'} w-full mx-auto`}>
             <h2 className="text-2xl font-bold text-blue-700 mb-6 text-center">DCF Valuation</h2>
             <form onSubmit={handleSubmit} className="space-y-5">
                 <div>

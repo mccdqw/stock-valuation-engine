@@ -53,6 +53,20 @@ def get_shares_outstanding(ticker):
     shares_outstanding.index = shares_outstanding.index.year
     return shares_outstanding
 
+def get_ltl_fcf(ticker):
+    import yfinance as yf
+    stock = yf.Ticker(ticker)
+    balance_sheet = stock.balance_sheet
+    cashflow = stock.cashflow
+    ltl = balance_sheet.loc["Total Non Current Liabilities Net Minority Interest"]
+    fcf = cashflow.loc["Free Cash Flow"]
+    return ltl.iloc[0], fcf
+
+def get_market_cap(ticker):
+    import yfinance as yf
+    stock = yf.Ticker(ticker)
+    return stock.info["marketCap"]
+
 def get_stock_financials(ticker):
     import yfinance as yf
     stock = yf.Ticker(ticker)
