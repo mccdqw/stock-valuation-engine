@@ -36,9 +36,24 @@ def get_avg_pe_ratio(ticker):
     return merged["P/E"]
 
 def get_revenue(ticker):
-    import yfinance as yf
-    stock = yf.Ticker(ticker)
-    financials = stock.financials
+    financials = get_stock_financials(ticker)
     revenue = financials.loc['Total Revenue']
     revenue.index = revenue.index.year
     return revenue
+
+def get_net_income(ticker):
+    financials = get_stock_financials(ticker)
+    net_income = financials.loc["Net Income"]
+    net_income.index = net_income.index.year
+    return net_income
+
+def get_shares_outstanding(ticker):
+    financials = get_stock_financials(ticker)
+    shares_outstanding = financials.loc["Basic Average Shares"]
+    shares_outstanding.index = shares_outstanding.index.year
+    return shares_outstanding
+
+def get_stock_financials(ticker):
+    import yfinance as yf
+    stock = yf.Ticker(ticker)
+    return stock.financials
