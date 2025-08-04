@@ -27,9 +27,12 @@ The frontend is built using React and provides a user interface for interacting 
   - **index.js**: The entry point that renders the App component.
   - **components/**: Contains React components for various functionalities:
     - **ValuationForm.js**: Component for inputting stock data and DCF parameters.
-    - **MetricsDisplay.js**: Component for displaying key financial metrics.
-    - **TickerSearch.js**: Component for searching and selecting stock tickers.
-  - **api/valuationApi.js**: Functions for making API calls to the Flask backend.
+    - **MetricsDisplay.js**: Component for displaying all data being retrieved from backend.
+    - **HistoryTable.js**: Component for displaying company financials over time.
+    - **MetricCard.js**: Component for showing specific financial metrics.
+    - **MonteCarlo.js**: Page for displaying monte carlo input form and simulation results.
+    - **MonteCarloForm.js**: Component for letting users input parameters for running the monte carlo.
+    - **MonteCarloResults.js**: Component for dispalying results of the monte carlo.
 
 ## Setup Instructions
 
