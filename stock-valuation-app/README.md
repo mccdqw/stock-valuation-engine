@@ -59,7 +59,9 @@ The frontend is built using React and provides a user interface for interacting 
 
 ## Usage
 
-Once both the backend and frontend are running, you can access the application in your web browser. Use the search functionality to find stocks, input parameters for the DCF model, and view key metrics.
+Once both the backend and frontend are running, you can access the application in your web browser. From there you can input parameters to run a DCF model, and view key metrics. In
+addition, I have added a monte carlo implementation of the DCF model that lets you run the same analysis but with an intrinsic value that is arrived at through many iterations
+of the dcf model with varying levels of revenue growth, cash flow margin, and discount rate.
 
 ## Contributing
 
