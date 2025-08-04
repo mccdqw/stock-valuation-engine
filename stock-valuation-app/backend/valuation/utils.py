@@ -1,8 +1,8 @@
 import pandas as pd
+import numpy as np
 
 def fetch_stock_data(ticker):
-    import yfinance as yf
-    stock = yf.Ticker(ticker)
+    stock = get_stock(ticker)
     info = stock.info
     cashflow = stock.cashflow
     return info, cashflow
@@ -18,8 +18,7 @@ def dcf_model(fcf, growth, discount, years=5, terminal_growth=0.02):
     return npv + terminal_pv
 
 def get_avg_pe_ratio(ticker):
-    import yfinance as yf
-    stock = yf.Ticker(ticker)
+    stock = get_stock(ticker)
     financials = stock.financials
     net_income = financials.loc["Net Income"]
     shares_outstanding = financials.loc["Basic Average Shares"]
@@ -54,8 +53,7 @@ def get_shares_outstanding(ticker):
     return shares_outstanding
 
 def get_ltl_fcf(ticker):
-    import yfinance as yf
-    stock = yf.Ticker(ticker)
+    stock = get_stock(ticker)
     balance_sheet = stock.balance_sheet
     cashflow = stock.cashflow
     ltl = balance_sheet.loc["Total Non Current Liabilities Net Minority Interest"]
@@ -67,7 +65,51 @@ def get_market_cap(ticker):
     stock = yf.Ticker(ticker)
     return stock.info["marketCap"]
 
+def run_dcf_monte_carlo(ticker, iterations=1000,
+    revenue_growth_mean=0.25,
+    revenue_growth_std=0.02,
+    margin_std=0.03,
+    discount_rate_mean=0.10,
+    discount_rate_std=0.02,
+    years=5):
+    intrinsic_values = []
+    stock = get_stock(ticker)
+
+    for _ in range(iterations):
+        revenue = get_revenue(ticker).iloc[0]
+        fcf = stock.cashflow.loc["Free Cash Flow"].iloc[0]
+        margin_mean = fcf / revenue
+        shares_outstanding = get_shares_outstanding(ticker).iloc[0]
+
+        growth = np.random.normal(revenue_growth_mean, revenue_growth_std)
+        margin = np.random.normal(margin_mean, margin_std)
+        discount_rate = np.random.normal(discount_rate_mean, discount_rate_std)
+
+        cash_flows = []
+
+        for _ in range(years):
+            revenue *= (1 + growth)
+            cash_flow = revenue * margin
+            cash_flows.append(cash_flow)
+
+        terminal_growth_rate = 0.02  # 2% terminal growth rate, adjust as needed
+        # Calculate terminal value based on last year's cash flow
+        terminal_value = cash_flows[-1] * (1 + terminal_growth_rate) / (discount_rate - terminal_growth_rate)
+        # Discount terminal value back to present
+        terminal_value_pv = terminal_value / (1 + discount_rate)**years
+        # Total present value = sum of discounted cash flows + discounted terminal value
+        present_value = sum(cf / (1 + discount_rate)**(i+1) for i, cf in enumerate(cash_flows)) + terminal_value_pv
+        if isinstance(present_value, float) and not np.isnan(present_value) and shares_outstanding > 0:
+            intrinsic_per_share = present_value / shares_outstanding
+            intrinsic_values.append(intrinsic_per_share)
+
+    return intrinsic_values
+
+
 def get_stock_financials(ticker):
-    import yfinance as yf
-    stock = yf.Ticker(ticker)
+    stock = get_stock(ticker)
     return stock.financials
+
+def get_stock(ticker):
+    import yfinance as yf
+    return yf.Ticker(ticker)

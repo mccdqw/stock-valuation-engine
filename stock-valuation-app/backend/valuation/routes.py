@@ -1,7 +1,8 @@
 from flask import Blueprint, request, jsonify
 import yfinance as yf
 import pandas as pd
-from .utils import dcf_model, get_avg_pe_ratio, get_revenue, fetch_stock_data, get_net_income, get_shares_outstanding, get_ltl_fcf, get_market_cap
+import numpy as np
+from .utils import dcf_model, get_avg_pe_ratio, get_revenue, fetch_stock_data, get_net_income, get_shares_outstanding, get_ltl_fcf, get_market_cap, run_dcf_monte_carlo
 
 valuation_bp = Blueprint('valuation', __name__)
 
@@ -36,8 +37,8 @@ def stock_data(ticker):
 
 @valuation_bp.route('/api/test_data/<ticker>', methods=['GET'])   
 def test_data(ticker):
-    data = get_market_cap(ticker)
-    # print(data)
+    data = run_dcf_monte_carlo(ticker)
+    print(data)
     # return jsonify(data)
 
 @valuation_bp.route('/api/key_metrics/<ticker>', methods=['GET'])
@@ -118,3 +119,26 @@ def get_dcf_valuation():
         return jsonify({"intrinsicValuePerShare": round(intrinsic_per_share, 2)})
     else:
         return jsonify({"error": str(e)}), 500
+    
+@valuation_bp.route('/api/dcf_monte_carlo', methods=['POST'])
+def dcf_monte_carlo():
+    data = request.json
+    ticker = data.get('ticker')
+    iterations = data.get('iterations')
+    revenue_growth_mean = data.get('revenue_growth_mean')
+    revenue_growth_std = data.get('revenue_growth_std')
+    margin_std = data.get('margin_std')
+    discount_rate_mean = data.get('discount_rate_mean')
+    discount_rate_std = data.get('discount_rate_std')
+    years = data.get('years')
+    values_list = run_dcf_monte_carlo(ticker, iterations, revenue_growth_mean, revenue_growth_std, margin_std, discount_rate_mean, discount_rate_std, years)
+    summary = {
+        "mean": float(np.mean(values_list)),
+        "median": float(np.median(values_list)),
+        "percentile10": float(np.percentile(values_list, 10)),
+        "percentile90": float(np.percentile(values_list, 90))
+    }
+    return jsonify({
+        "values": values_list,
+        "summary": summary
+    })
