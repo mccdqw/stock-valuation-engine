@@ -7,46 +7,44 @@ import MonteCarloPage from './components/MonteCarlo';
 function Home({ ticker, setTicker, showResults, setShowResults }) {
   return (
     <>
-      {/* Centered Valuation Form */}
-      <div className="flex justify-center mb-10">
-        <div className="w-full md:w-2/3 lg:w-1/2">
-          <ValuationForm setTicker={setTicker} setShowResults={setShowResults} large />
-        </div>
-      </div>
-      {/* Bottom: Metrics Cards (left) and History Tables (right) */}
-      {showResults && (
-        <div className="flex flex-col lg:flex-row gap-8 items-start">
-          {/* Metrics Cards */}
-          <div className="w-full lg:w-1/2">
-            <MetricsDisplay ticker={ticker} onlyCards />
+      {showResults ? (
+        <div className="flex flex-col lg:flex-row gap-8">
+          
+          {/* Left: Valuation Form */}
+          <div className="w-full lg:w-1/3">
+            <ValuationForm setTicker={setTicker} setShowResults={setShowResults} large />
           </div>
-          {/* History Tables in a 2x3 grid */}
-          <div className="w-full lg:w-1/2">
-            <div className="grid grid-cols-3 grid-rows-2 gap-6">
-              {/* Top row */}
-              <div>
-                <MetricsDisplay ticker={ticker} tableName="pe_ratio" />
-              </div>
-              <div></div>
-              <div>
-                <MetricsDisplay ticker={ticker} tableName="revenue" />
-              </div>
-              {/* Bottom row */}
-              <div>
-                <MetricsDisplay ticker={ticker} tableName="net_income" />
-              </div>
-              <div className="flex items-center justify-center">
-                <MetricsDisplay ticker={ticker} tableName="shares_outstanding" />
-              </div>
-              <div>
-                <MetricsDisplay ticker={ticker} tableName="free_cash_flow" />
-              </div>
+
+          {/* Right: Metrics Section */}
+          <div className="w-full lg:w-2/3 flex flex-col gap-8">
+            {/* Metrics Cards */}
+            <div>
+              <MetricsDisplay ticker={ticker} onlyCards />
             </div>
+
+            {/* History Tables */}
+            <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6">
+              <MetricsDisplay ticker={ticker} tableName="pe_ratio" />
+              <MetricsDisplay ticker={ticker} tableName="revenue" />
+              <MetricsDisplay ticker={ticker} tableName="net_income" />
+              <MetricsDisplay ticker={ticker} tableName="shares_outstanding" />
+              <MetricsDisplay ticker={ticker} tableName="free_cash_flow" />
+            </div>
+          </div>
+        </div>
+      ) : (
+        // Initial layout when results are not shown
+        <div className="flex justify-center">
+          <div className="w-full lg:w-1/3">
+            <ValuationForm setTicker={setTicker} setShowResults={setShowResults} large />
           </div>
         </div>
       )}
     </>
   );
+
+
+
 }
 
 function App() {

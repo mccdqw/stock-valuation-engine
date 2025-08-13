@@ -48,7 +48,15 @@ const MetricsDisplay = ({ ticker, onlyCards, onlyTables, tableName }) => {
         years: metrics.revenue_series.years,
         values: metrics.revenue_series.values,
         valueFormatter: val => (
-          <span className="text-green-700">{isNaN(val) ? 'N/A' : `$${(val / 1e9).toFixed(2)}B`}</span>
+          <span className="text-green-700">
+            {isNaN(val)
+              ? 'N/A'
+              : Math.abs(val) >= 1e9
+                ? `$${(val / 1e9).toFixed(2)}B`
+                : Math.abs(val) >= 1e6
+                  ? `$${(val / 1e6).toFixed(0)}M`
+                  : `$${val.toLocaleString()}`}
+          </span>
         ),
       },
       net_income: {
@@ -56,7 +64,15 @@ const MetricsDisplay = ({ ticker, onlyCards, onlyTables, tableName }) => {
         years: metrics.net_income_series.years,
         values: metrics.net_income_series.values,
         valueFormatter: val => (
-          <span className="text-green-700">{isNaN(val) ? 'N/A' : `$${(val / 1e9).toFixed(2)}B`}</span>
+          <span className="text-green-700">
+            {isNaN(val)
+              ? 'N/A'
+              : Math.abs(val) >= 1e9
+                ? `$${(val / 1e9).toFixed(2)}B`
+                : Math.abs(val) >= 1e6
+                  ? `$${(val / 1e6).toFixed(0)}M`
+                  : `$${val.toLocaleString()}`}
+          </span>
         ),
       },
       free_cash_flow: {
@@ -64,7 +80,15 @@ const MetricsDisplay = ({ ticker, onlyCards, onlyTables, tableName }) => {
         years: metrics.free_cash_flow_series.years,
         values: metrics.free_cash_flow_series.values,
         valueFormatter: val => (
-          <span className="text-green-700">{isNaN(val) ? 'N/A' : `$${(val / 1e9).toFixed(2)}B`}</span>
+          <span className="text-green-700">
+            {isNaN(val)
+              ? 'N/A'
+              : Math.abs(val) >= 1e9
+                ? `$${(val / 1e9).toFixed(2)}B`
+                : Math.abs(val) >= 1e6
+                  ? `$${(val / 1e6).toFixed(0)}M`
+                  : `$${val.toLocaleString()}`}
+          </span>
         ),
       },
       shares_outstanding: {
@@ -72,7 +96,15 @@ const MetricsDisplay = ({ ticker, onlyCards, onlyTables, tableName }) => {
         years: metrics.shares_outstanding_series.years,
         values: metrics.shares_outstanding_series.values,
         valueFormatter: val => (
-          <span className="text-green-700">{isNaN(val) ? 'N/A' : `${(val / 1e9).toFixed(2)}B`}</span>
+          <span className="text-green-700">
+            {isNaN(val)
+              ? 'N/A'
+              : Math.abs(val) >= 1e9
+                ? `$${(val / 1e9).toFixed(2)}B`
+                : Math.abs(val) >= 1e6
+                  ? `$${(val / 1e6).toFixed(0)}M`
+                  : `$${val.toLocaleString()}`}
+          </span>
         ),
       },
     };
