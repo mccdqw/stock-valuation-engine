@@ -2,18 +2,15 @@ from fastapi import FastAPI, HTTPException, Form, UploadFile, File
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
 from typing import Dict, List, Optional, Any
-from datetime import datetime
 import uuid
 import json
 import numpy as np
-from typing import Annotated
 from io import StringIO
 
 # Import your modular backend code
 from strategies.strategy_factor import StrategyFactory
 from data_sources.stock_db import load_from_stock_db
 from data_sources.custom_upload import load_from_upload
-from strategies.moving_average import MovingAverageCrossover
 from execution.engine import simple_market_fill
 
 # Initialize FastAPI app
@@ -25,9 +22,8 @@ class BacktestRequest(BaseModel):
     symbol: Optional[str] = None
     start_date: Optional[str] = None  # ISO format, e.g., "2023-01-01"
     end_date: Optional[str] = None    # ISO format, e.g., "2025-01-01"
-    strategy: Dict[str, Any]                 # e.g., {"type": "ma_crossover", "short_window": 50, "long_window": 200}
+    strategy: Dict[str, Any]          # e.g., {"type": "ma_crossover", "short_window": 50, "long_window": 200}
     initial_capital: float
-    # custom_file: Annotated[UploadFile, File()] = None  # Path to custom upload file
 
 class BacktestResponse(BaseModel):
     backtest_id: str
@@ -38,61 +34,6 @@ class BacktestResponse(BaseModel):
 @app.get("/")
 async def read_root():
     return {"message": "Hello World"}
-
-# async def run_modular_backtest(symbol: str, start_date: str, end_date: str,
-#                                initial_capital: float, strategy: str,
-#                                short_window: int, long_window: int,
-#                                custom_file: UploadFile = None,):
-#     print(f"Symbol: {symbol}")
-#     print(f"Start Date: {start_date}")
-#     print(f"End Date: {end_date}")
-#     print(f"Initial Capital: {initial_capital}")
-#     print(f"Short Window: {short_window}")
-#     print(f"Long Window: {long_window}")
-
-#     try:
-#         strategy_config = json.loads(strategy)  # Convert string → dict
-#     except json.JSONDecodeError:
-#         raise ValueError("Invalid JSON for strategy configuration")
-    
-#     print(strategy_config)
-    
-#     # Load data
-#     if custom_file:
-#         # Read the file content as bytes
-#         contents = await custom_file.read()
-
-#         # Decode bytes to string and create an in-memory text buffer
-#         s_io = StringIO(contents.decode('utf-8'))
-#         data = load_from_upload(s_io)
-#         # print(data.head())
-#     else:
-#         if not symbol or not start_date or not end_date:
-#             raise ValueError("Missing symbol or date range for stock DB data source.")
-#         data = load_from_stock_db(symbol, start_date, end_date)
-
-#     # Select strategy
-#     strat = create_strategy(strategy, short_window, long_window)
-#     print(type(strat))
-
-#     # Generate signals and run execution engine
-#     data_with_signals = strat.generate_signals(data)
-#     print(data_with_signals)
-#     equity, returns, trades = simple_market_fill(data_with_signals, initial_capital, return_trades=True)
-
-#     # Build equity curve
-#     equity_curve = [
-#         {"timestamp": str(idx), "equity": eq}
-#         for idx, eq in equity.items()
-#     ]
-
-#     # Calculate metrics
-#     ret_arr = np.array(list(returns.values()))
-#     sharpe_ratio = float(np.mean(ret_arr) / np.std(ret_arr) * np.sqrt(252)) if ret_arr.size > 1 and np.std(ret_arr) > 0 else 0.0
-#     total_return = float(ret_arr[-1]) if ret_arr.size > 0 else 0.0
-#     metrics = {"sharpe_ratio": sharpe_ratio, "total_return": total_return}
-
-#     return metrics, equity_curve, trades
 
 
 @app.post("/backtest", response_model=BacktestResponse)
@@ -135,10 +76,6 @@ async def run_backtest_endpoint(
             initial_capital=request.initial_capital,
             return_trades=True
         )
-
-        print("equity dict", equity_dict)
-        print("returns dict", returns_dict)
-        print("trades", trades)
         
         # Calculate metrics
         ret_arr = np.array(list(returns_dict.values()))
@@ -154,10 +91,7 @@ async def run_backtest_endpoint(
             for ts, eq in equity_dict.items()
         ]
 
-        print(metrics)
-        print(equity_curve)
-        print(trades)
-        
+    
         return BacktestResponse(
             backtest_id=str(uuid.uuid4()),
             metrics=metrics,

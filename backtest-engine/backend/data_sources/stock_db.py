@@ -4,9 +4,6 @@ import duckdb
 from fastapi import HTTPException
 
 def load_from_stock_db(symbol: str, start_date: str, end_date: str) -> pl.DataFrame:
-    # Placeholder: connect to your stock price database
-    # Return DataFrame with Date index and OHLCV columns
-
     con = duckdb.connect("E:/python coding/projects/asset-management-dashboard/nuclear_stocks.duckdb")
 
     # Query market data from DuckDB using Polars
