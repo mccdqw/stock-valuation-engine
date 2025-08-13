@@ -1,2 +1,9 @@
 .env
 stock-valuation-app/frontend/node_modules
+backtest-engine/backend/__pycache__/
+backtest-engine/backend/data_sources/__pycache__/
+backtest-engine/backend/execution/__pycache__/
+backtest-engine/backend/strategies/__pycache__/
+backtest-engine/frontend/package-lock.json
+stock-valuation-app/backend/valuation/__pycache__/
+backtest-engine/frontend/src/assets/
