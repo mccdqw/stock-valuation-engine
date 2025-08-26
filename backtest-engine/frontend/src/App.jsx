@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import BacktestForm from './components/BacktestForm';
+import StrategyFormWrapper from './components/StrategyFormWrapper';
 import BacktestResults from './components/BacktestResults';
 import axios from 'axios';
 
@@ -38,7 +39,7 @@ function App() {
         <div className="flex gap-8">
           {/* Left side - Form */}
           <div className="w-1/3 flex-shrink-0">
-            <BacktestForm onSubmit={handleBacktestSubmit} />
+            <StrategyFormWrapper onSubmit={handleBacktestSubmit} />
             {error && (
               <div className="mt-4 p-4 bg-red-50 border border-red-200 rounded-lg">
                 <p className="text-red-700">{error}</p>

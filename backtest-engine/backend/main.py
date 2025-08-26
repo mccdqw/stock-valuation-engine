@@ -6,6 +6,7 @@ import uuid
 import json
 import numpy as np
 from io import StringIO
+import quantstats as qs
 
 # Import your modular backend code
 from strategies.strategy_factor import StrategyFactory
@@ -25,6 +26,7 @@ class BacktestRequest(BaseModel):
     strategy: Dict[str, Any]          # e.g., {"type": "ma_crossover", "short_window": 50, "long_window": 200}
     initial_capital: float
 
+# TODO add QuantStats library for metrics
 class BacktestResponse(BaseModel):
     backtest_id: str
     metrics: Dict
